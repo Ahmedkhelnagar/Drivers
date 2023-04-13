@@ -1,0 +1,449 @@
+
+keypad.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000002a8  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .stab         000005d0  00000000  00000000  000002fc  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  2 .stabstr      000007ff  00000000  00000000  000008cc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d4 e0       	ldi	r29, 0x04	; 4
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 34 01 	call	0x268	; 0x268 <main>
+  64:	0c 94 52 01 	jmp	0x2a4	; 0x2a4 <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <KeyPad_getPressedKey>:
+
+/*******************************************************************************
+ *                      Functions Definitions                                  *
+ *******************************************************************************/
+uint8 KeyPad_getPressedKey(void)
+{
+  6c:	df 93       	push	r29
+  6e:	cf 93       	push	r28
+  70:	00 d0       	rcall	.+0      	; 0x72 <KeyPad_getPressedKey+0x6>
+  72:	cd b7       	in	r28, 0x3d	; 61
+  74:	de b7       	in	r29, 0x3e	; 62
+	uint8 col,row;
+	while(1)
+	{
+		for(col=0;col<N_col;col++) /* loop for columns */
+  76:	1a 82       	std	Y+2, r1	; 0x02
+  78:	4c c0       	rjmp	.+152    	; 0x112 <KeyPad_getPressedKey+0xa6>
+		{
+			/*
+			 * each time only one of the column pins will be output and
+			 * the rest will be input pins include the row pins
+			 */
+			KEYPAD_PORT_DIR = (0b00010000<<col);
+  7a:	ea e3       	ldi	r30, 0x3A	; 58
+  7c:	f0 e0       	ldi	r31, 0x00	; 0
+  7e:	8a 81       	ldd	r24, Y+2	; 0x02
+  80:	28 2f       	mov	r18, r24
+  82:	30 e0       	ldi	r19, 0x00	; 0
+  84:	80 e1       	ldi	r24, 0x10	; 16
+  86:	90 e0       	ldi	r25, 0x00	; 0
+  88:	02 c0       	rjmp	.+4      	; 0x8e <KeyPad_getPressedKey+0x22>
+  8a:	88 0f       	add	r24, r24
+  8c:	99 1f       	adc	r25, r25
+  8e:	2a 95       	dec	r18
+  90:	e2 f7       	brpl	.-8      	; 0x8a <KeyPad_getPressedKey+0x1e>
+  92:	80 83       	st	Z, r24
+
+			/*
+			 * clear the output pin column in this trace and enable the internal
+			 * pull up resistors for the rows pins
+			 */
+			KEYPAD_PORT_OUT = (~(0b00010000<<col));
+  94:	eb e3       	ldi	r30, 0x3B	; 59
+  96:	f0 e0       	ldi	r31, 0x00	; 0
+  98:	8a 81       	ldd	r24, Y+2	; 0x02
+  9a:	28 2f       	mov	r18, r24
+  9c:	30 e0       	ldi	r19, 0x00	; 0
+  9e:	80 e1       	ldi	r24, 0x10	; 16
+  a0:	90 e0       	ldi	r25, 0x00	; 0
+  a2:	02 2e       	mov	r0, r18
+  a4:	02 c0       	rjmp	.+4      	; 0xaa <KeyPad_getPressedKey+0x3e>
+  a6:	88 0f       	add	r24, r24
+  a8:	99 1f       	adc	r25, r25
+  aa:	0a 94       	dec	r0
+  ac:	e2 f7       	brpl	.-8      	; 0xa6 <KeyPad_getPressedKey+0x3a>
+  ae:	80 95       	com	r24
+  b0:	80 83       	st	Z, r24
+
+			for(row=0;row<N_row;row++) /* loop for rows */
+  b2:	19 82       	std	Y+1, r1	; 0x01
+  b4:	28 c0       	rjmp	.+80     	; 0x106 <KeyPad_getPressedKey+0x9a>
+			{
+				if(BIT_IS_CLEAR(KEYPAD_PORT_IN,row)) /* if the switch is press in this row */
+  b6:	e9 e3       	ldi	r30, 0x39	; 57
+  b8:	f0 e0       	ldi	r31, 0x00	; 0
+  ba:	80 81       	ld	r24, Z
+  bc:	28 2f       	mov	r18, r24
+  be:	30 e0       	ldi	r19, 0x00	; 0
+  c0:	89 81       	ldd	r24, Y+1	; 0x01
+  c2:	88 2f       	mov	r24, r24
+  c4:	90 e0       	ldi	r25, 0x00	; 0
+  c6:	a9 01       	movw	r20, r18
+  c8:	02 c0       	rjmp	.+4      	; 0xce <KeyPad_getPressedKey+0x62>
+  ca:	55 95       	asr	r21
+  cc:	47 95       	ror	r20
+  ce:	8a 95       	dec	r24
+  d0:	e2 f7       	brpl	.-8      	; 0xca <KeyPad_getPressedKey+0x5e>
+  d2:	ca 01       	movw	r24, r20
+  d4:	81 70       	andi	r24, 0x01	; 1
+  d6:	90 70       	andi	r25, 0x00	; 0
+  d8:	00 97       	sbiw	r24, 0x00	; 0
+  da:	91 f4       	brne	.+36     	; 0x100 <KeyPad_getPressedKey+0x94>
+				{
+					#if (N_col == 3)
+						return KeyPad_4x3_adjustKeyNumber((row*N_col)+col+1);
+					#elif (N_col == 4)
+						return KeyPad_4x4_adjustKeyNumber((row*N_col)+col+1);
+  dc:	89 81       	ldd	r24, Y+1	; 0x01
+  de:	88 2f       	mov	r24, r24
+  e0:	90 e0       	ldi	r25, 0x00	; 0
+  e2:	88 0f       	add	r24, r24
+  e4:	99 1f       	adc	r25, r25
+  e6:	88 0f       	add	r24, r24
+  e8:	99 1f       	adc	r25, r25
+  ea:	98 2f       	mov	r25, r24
+  ec:	8a 81       	ldd	r24, Y+2	; 0x02
+  ee:	89 0f       	add	r24, r25
+  f0:	8f 5f       	subi	r24, 0xFF	; 255
+  f2:	0e 94 8e 00 	call	0x11c	; 0x11c <KeyPad_4x4_adjustKeyNumber>
+					#endif
+				}
+			}
+		}
+	}
+}
+  f6:	0f 90       	pop	r0
+  f8:	0f 90       	pop	r0
+  fa:	cf 91       	pop	r28
+  fc:	df 91       	pop	r29
+  fe:	08 95       	ret
+			 * clear the output pin column in this trace and enable the internal
+			 * pull up resistors for the rows pins
+			 */
+			KEYPAD_PORT_OUT = (~(0b00010000<<col));
+
+			for(row=0;row<N_row;row++) /* loop for rows */
+ 100:	89 81       	ldd	r24, Y+1	; 0x01
+ 102:	8f 5f       	subi	r24, 0xFF	; 255
+ 104:	89 83       	std	Y+1, r24	; 0x01
+ 106:	89 81       	ldd	r24, Y+1	; 0x01
+ 108:	84 30       	cpi	r24, 0x04	; 4
+ 10a:	a8 f2       	brcs	.-86     	; 0xb6 <KeyPad_getPressedKey+0x4a>
+uint8 KeyPad_getPressedKey(void)
+{
+	uint8 col,row;
+	while(1)
+	{
+		for(col=0;col<N_col;col++) /* loop for columns */
+ 10c:	8a 81       	ldd	r24, Y+2	; 0x02
+ 10e:	8f 5f       	subi	r24, 0xFF	; 255
+ 110:	8a 83       	std	Y+2, r24	; 0x02
+ 112:	8a 81       	ldd	r24, Y+2	; 0x02
+ 114:	84 30       	cpi	r24, 0x04	; 4
+ 116:	08 f4       	brcc	.+2      	; 0x11a <KeyPad_getPressedKey+0xae>
+ 118:	b0 cf       	rjmp	.-160    	; 0x7a <KeyPad_getPressedKey+0xe>
+ 11a:	ad cf       	rjmp	.-166    	; 0x76 <KeyPad_getPressedKey+0xa>
+
+0000011c <KeyPad_4x4_adjustKeyNumber>:
+}
+
+#elif (N_col == 4)
+
+static uint8 KeyPad_4x4_adjustKeyNumber(uint8 button_number)
+{
+ 11c:	df 93       	push	r29
+ 11e:	cf 93       	push	r28
+ 120:	00 d0       	rcall	.+0      	; 0x122 <KeyPad_4x4_adjustKeyNumber+0x6>
+ 122:	00 d0       	rcall	.+0      	; 0x124 <KeyPad_4x4_adjustKeyNumber+0x8>
+ 124:	cd b7       	in	r28, 0x3d	; 61
+ 126:	de b7       	in	r29, 0x3e	; 62
+ 128:	89 83       	std	Y+1, r24	; 0x01
+	switch(button_number)
+ 12a:	89 81       	ldd	r24, Y+1	; 0x01
+ 12c:	28 2f       	mov	r18, r24
+ 12e:	30 e0       	ldi	r19, 0x00	; 0
+ 130:	3c 83       	std	Y+4, r19	; 0x04
+ 132:	2b 83       	std	Y+3, r18	; 0x03
+ 134:	8b 81       	ldd	r24, Y+3	; 0x03
+ 136:	9c 81       	ldd	r25, Y+4	; 0x04
+ 138:	88 30       	cpi	r24, 0x08	; 8
+ 13a:	91 05       	cpc	r25, r1
+ 13c:	09 f4       	brne	.+2      	; 0x140 <KeyPad_4x4_adjustKeyNumber+0x24>
+ 13e:	70 c0       	rjmp	.+224    	; 0x220 <KeyPad_4x4_adjustKeyNumber+0x104>
+ 140:	2b 81       	ldd	r18, Y+3	; 0x03
+ 142:	3c 81       	ldd	r19, Y+4	; 0x04
+ 144:	29 30       	cpi	r18, 0x09	; 9
+ 146:	31 05       	cpc	r19, r1
+ 148:	5c f5       	brge	.+86     	; 0x1a0 <KeyPad_4x4_adjustKeyNumber+0x84>
+ 14a:	8b 81       	ldd	r24, Y+3	; 0x03
+ 14c:	9c 81       	ldd	r25, Y+4	; 0x04
+ 14e:	84 30       	cpi	r24, 0x04	; 4
+ 150:	91 05       	cpc	r25, r1
+ 152:	09 f4       	brne	.+2      	; 0x156 <KeyPad_4x4_adjustKeyNumber+0x3a>
+ 154:	59 c0       	rjmp	.+178    	; 0x208 <KeyPad_4x4_adjustKeyNumber+0xec>
+ 156:	2b 81       	ldd	r18, Y+3	; 0x03
+ 158:	3c 81       	ldd	r19, Y+4	; 0x04
+ 15a:	25 30       	cpi	r18, 0x05	; 5
+ 15c:	31 05       	cpc	r19, r1
+ 15e:	9c f4       	brge	.+38     	; 0x186 <KeyPad_4x4_adjustKeyNumber+0x6a>
+ 160:	8b 81       	ldd	r24, Y+3	; 0x03
+ 162:	9c 81       	ldd	r25, Y+4	; 0x04
+ 164:	82 30       	cpi	r24, 0x02	; 2
+ 166:	91 05       	cpc	r25, r1
+ 168:	09 f4       	brne	.+2      	; 0x16c <KeyPad_4x4_adjustKeyNumber+0x50>
+ 16a:	48 c0       	rjmp	.+144    	; 0x1fc <KeyPad_4x4_adjustKeyNumber+0xe0>
+ 16c:	2b 81       	ldd	r18, Y+3	; 0x03
+ 16e:	3c 81       	ldd	r19, Y+4	; 0x04
+ 170:	23 30       	cpi	r18, 0x03	; 3
+ 172:	31 05       	cpc	r19, r1
+ 174:	0c f0       	brlt	.+2      	; 0x178 <KeyPad_4x4_adjustKeyNumber+0x5c>
+ 176:	45 c0       	rjmp	.+138    	; 0x202 <KeyPad_4x4_adjustKeyNumber+0xe6>
+ 178:	8b 81       	ldd	r24, Y+3	; 0x03
+ 17a:	9c 81       	ldd	r25, Y+4	; 0x04
+ 17c:	81 30       	cpi	r24, 0x01	; 1
+ 17e:	91 05       	cpc	r25, r1
+ 180:	09 f4       	brne	.+2      	; 0x184 <KeyPad_4x4_adjustKeyNumber+0x68>
+ 182:	39 c0       	rjmp	.+114    	; 0x1f6 <KeyPad_4x4_adjustKeyNumber+0xda>
+ 184:	67 c0       	rjmp	.+206    	; 0x254 <KeyPad_4x4_adjustKeyNumber+0x138>
+ 186:	2b 81       	ldd	r18, Y+3	; 0x03
+ 188:	3c 81       	ldd	r19, Y+4	; 0x04
+ 18a:	26 30       	cpi	r18, 0x06	; 6
+ 18c:	31 05       	cpc	r19, r1
+ 18e:	09 f4       	brne	.+2      	; 0x192 <KeyPad_4x4_adjustKeyNumber+0x76>
+ 190:	41 c0       	rjmp	.+130    	; 0x214 <KeyPad_4x4_adjustKeyNumber+0xf8>
+ 192:	8b 81       	ldd	r24, Y+3	; 0x03
+ 194:	9c 81       	ldd	r25, Y+4	; 0x04
+ 196:	87 30       	cpi	r24, 0x07	; 7
+ 198:	91 05       	cpc	r25, r1
+ 19a:	0c f0       	brlt	.+2      	; 0x19e <KeyPad_4x4_adjustKeyNumber+0x82>
+ 19c:	3e c0       	rjmp	.+124    	; 0x21a <KeyPad_4x4_adjustKeyNumber+0xfe>
+ 19e:	37 c0       	rjmp	.+110    	; 0x20e <KeyPad_4x4_adjustKeyNumber+0xf2>
+ 1a0:	2b 81       	ldd	r18, Y+3	; 0x03
+ 1a2:	3c 81       	ldd	r19, Y+4	; 0x04
+ 1a4:	2c 30       	cpi	r18, 0x0C	; 12
+ 1a6:	31 05       	cpc	r19, r1
+ 1a8:	09 f4       	brne	.+2      	; 0x1ac <KeyPad_4x4_adjustKeyNumber+0x90>
+ 1aa:	46 c0       	rjmp	.+140    	; 0x238 <KeyPad_4x4_adjustKeyNumber+0x11c>
+ 1ac:	8b 81       	ldd	r24, Y+3	; 0x03
+ 1ae:	9c 81       	ldd	r25, Y+4	; 0x04
+ 1b0:	8d 30       	cpi	r24, 0x0D	; 13
+ 1b2:	91 05       	cpc	r25, r1
+ 1b4:	5c f4       	brge	.+22     	; 0x1cc <KeyPad_4x4_adjustKeyNumber+0xb0>
+ 1b6:	2b 81       	ldd	r18, Y+3	; 0x03
+ 1b8:	3c 81       	ldd	r19, Y+4	; 0x04
+ 1ba:	2a 30       	cpi	r18, 0x0A	; 10
+ 1bc:	31 05       	cpc	r19, r1
+ 1be:	b1 f1       	breq	.+108    	; 0x22c <KeyPad_4x4_adjustKeyNumber+0x110>
+ 1c0:	8b 81       	ldd	r24, Y+3	; 0x03
+ 1c2:	9c 81       	ldd	r25, Y+4	; 0x04
+ 1c4:	8b 30       	cpi	r24, 0x0B	; 11
+ 1c6:	91 05       	cpc	r25, r1
+ 1c8:	a4 f5       	brge	.+104    	; 0x232 <KeyPad_4x4_adjustKeyNumber+0x116>
+ 1ca:	2d c0       	rjmp	.+90     	; 0x226 <KeyPad_4x4_adjustKeyNumber+0x10a>
+ 1cc:	2b 81       	ldd	r18, Y+3	; 0x03
+ 1ce:	3c 81       	ldd	r19, Y+4	; 0x04
+ 1d0:	2e 30       	cpi	r18, 0x0E	; 14
+ 1d2:	31 05       	cpc	r19, r1
+ 1d4:	b9 f1       	breq	.+110    	; 0x244 <KeyPad_4x4_adjustKeyNumber+0x128>
+ 1d6:	8b 81       	ldd	r24, Y+3	; 0x03
+ 1d8:	9c 81       	ldd	r25, Y+4	; 0x04
+ 1da:	8e 30       	cpi	r24, 0x0E	; 14
+ 1dc:	91 05       	cpc	r25, r1
+ 1de:	7c f1       	brlt	.+94     	; 0x23e <KeyPad_4x4_adjustKeyNumber+0x122>
+ 1e0:	2b 81       	ldd	r18, Y+3	; 0x03
+ 1e2:	3c 81       	ldd	r19, Y+4	; 0x04
+ 1e4:	2f 30       	cpi	r18, 0x0F	; 15
+ 1e6:	31 05       	cpc	r19, r1
+ 1e8:	79 f1       	breq	.+94     	; 0x248 <KeyPad_4x4_adjustKeyNumber+0x12c>
+ 1ea:	8b 81       	ldd	r24, Y+3	; 0x03
+ 1ec:	9c 81       	ldd	r25, Y+4	; 0x04
+ 1ee:	80 31       	cpi	r24, 0x10	; 16
+ 1f0:	91 05       	cpc	r25, r1
+ 1f2:	69 f1       	breq	.+90     	; 0x24e <KeyPad_4x4_adjustKeyNumber+0x132>
+ 1f4:	2f c0       	rjmp	.+94     	; 0x254 <KeyPad_4x4_adjustKeyNumber+0x138>
+	{
+		case 1: return 7;
+ 1f6:	97 e0       	ldi	r25, 0x07	; 7
+ 1f8:	9a 83       	std	Y+2, r25	; 0x02
+ 1fa:	2e c0       	rjmp	.+92     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 2: return 8;
+ 1fc:	28 e0       	ldi	r18, 0x08	; 8
+ 1fe:	2a 83       	std	Y+2, r18	; 0x02
+ 200:	2b c0       	rjmp	.+86     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 3: return 9;
+ 202:	39 e0       	ldi	r19, 0x09	; 9
+ 204:	3a 83       	std	Y+2, r19	; 0x02
+ 206:	28 c0       	rjmp	.+80     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 4: return '%'; // ASCII Code of %
+ 208:	85 e2       	ldi	r24, 0x25	; 37
+ 20a:	8a 83       	std	Y+2, r24	; 0x02
+ 20c:	25 c0       	rjmp	.+74     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 5: return 4;
+ 20e:	94 e0       	ldi	r25, 0x04	; 4
+ 210:	9a 83       	std	Y+2, r25	; 0x02
+ 212:	22 c0       	rjmp	.+68     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 6: return 5;
+ 214:	25 e0       	ldi	r18, 0x05	; 5
+ 216:	2a 83       	std	Y+2, r18	; 0x02
+ 218:	1f c0       	rjmp	.+62     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 7: return 6;
+ 21a:	36 e0       	ldi	r19, 0x06	; 6
+ 21c:	3a 83       	std	Y+2, r19	; 0x02
+ 21e:	1c c0       	rjmp	.+56     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 8: return '*'; /* ASCII Code of '*' */
+ 220:	8a e2       	ldi	r24, 0x2A	; 42
+ 222:	8a 83       	std	Y+2, r24	; 0x02
+ 224:	19 c0       	rjmp	.+50     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 9: return 1;
+ 226:	91 e0       	ldi	r25, 0x01	; 1
+ 228:	9a 83       	std	Y+2, r25	; 0x02
+ 22a:	16 c0       	rjmp	.+44     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 10: return 2;
+ 22c:	22 e0       	ldi	r18, 0x02	; 2
+ 22e:	2a 83       	std	Y+2, r18	; 0x02
+ 230:	13 c0       	rjmp	.+38     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 11: return 3;
+ 232:	33 e0       	ldi	r19, 0x03	; 3
+ 234:	3a 83       	std	Y+2, r19	; 0x02
+ 236:	10 c0       	rjmp	.+32     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 12: return '-'; /* ASCII Code of '-' */
+ 238:	8d e2       	ldi	r24, 0x2D	; 45
+ 23a:	8a 83       	std	Y+2, r24	; 0x02
+ 23c:	0d c0       	rjmp	.+26     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 13: return 13;  /* ASCII of Enter */
+ 23e:	9d e0       	ldi	r25, 0x0D	; 13
+ 240:	9a 83       	std	Y+2, r25	; 0x02
+ 242:	0a c0       	rjmp	.+20     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 14: return 0;
+ 244:	1a 82       	std	Y+2, r1	; 0x02
+ 246:	08 c0       	rjmp	.+16     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 15: return '='; /* ASCII Code of '=' */
+ 248:	2d e3       	ldi	r18, 0x3D	; 61
+ 24a:	2a 83       	std	Y+2, r18	; 0x02
+ 24c:	05 c0       	rjmp	.+10     	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		case 16: return '+'; /* ASCII Code of '+' */
+ 24e:	3b e2       	ldi	r19, 0x2B	; 43
+ 250:	3a 83       	std	Y+2, r19	; 0x02
+ 252:	02 c0       	rjmp	.+4      	; 0x258 <KeyPad_4x4_adjustKeyNumber+0x13c>
+				break;
+		default: return button_number;
+ 254:	89 81       	ldd	r24, Y+1	; 0x01
+ 256:	8a 83       	std	Y+2, r24	; 0x02
+ 258:	8a 81       	ldd	r24, Y+2	; 0x02
+	}
+}
+ 25a:	0f 90       	pop	r0
+ 25c:	0f 90       	pop	r0
+ 25e:	0f 90       	pop	r0
+ 260:	0f 90       	pop	r0
+ 262:	cf 91       	pop	r28
+ 264:	df 91       	pop	r29
+ 266:	08 95       	ret
+
+00000268 <main>:
+
+#endif
+
+int main(void)
+{
+ 268:	df 93       	push	r29
+ 26a:	cf 93       	push	r28
+ 26c:	0f 92       	push	r0
+ 26e:	cd b7       	in	r28, 0x3d	; 61
+ 270:	de b7       	in	r29, 0x3e	; 62
+	uint8 key;
+	DDRC  |= 0x0F; /* 7-segment pins as output pins */
+ 272:	a4 e3       	ldi	r26, 0x34	; 52
+ 274:	b0 e0       	ldi	r27, 0x00	; 0
+ 276:	e4 e3       	ldi	r30, 0x34	; 52
+ 278:	f0 e0       	ldi	r31, 0x00	; 0
+ 27a:	80 81       	ld	r24, Z
+ 27c:	8f 60       	ori	r24, 0x0F	; 15
+ 27e:	8c 93       	st	X, r24
+	PORTC &= 0xF0; /* 7-segment displays Zero at the beginning */
+ 280:	a5 e3       	ldi	r26, 0x35	; 53
+ 282:	b0 e0       	ldi	r27, 0x00	; 0
+ 284:	e5 e3       	ldi	r30, 0x35	; 53
+ 286:	f0 e0       	ldi	r31, 0x00	; 0
+ 288:	80 81       	ld	r24, Z
+ 28a:	80 7f       	andi	r24, 0xF0	; 240
+ 28c:	8c 93       	st	X, r24
+    while(1)
+    {
+        key = KeyPad_getPressedKey(); /* get the pressed button from keypad */
+ 28e:	0e 94 36 00 	call	0x6c	; 0x6c <KeyPad_getPressedKey>
+ 292:	89 83       	std	Y+1, r24	; 0x01
+	    if((key >= 0) && (key <= 9))
+ 294:	89 81       	ldd	r24, Y+1	; 0x01
+ 296:	8a 30       	cpi	r24, 0x0A	; 10
+ 298:	d0 f7       	brcc	.-12     	; 0x28e <main+0x26>
+		{
+			 PORTC = key;
+ 29a:	e5 e3       	ldi	r30, 0x35	; 53
+ 29c:	f0 e0       	ldi	r31, 0x00	; 0
+ 29e:	89 81       	ldd	r24, Y+1	; 0x01
+ 2a0:	80 83       	st	Z, r24
+ 2a2:	f5 cf       	rjmp	.-22     	; 0x28e <main+0x26>
+
+000002a4 <_exit>:
+ 2a4:	f8 94       	cli
+
+000002a6 <__stop_program>:
+ 2a6:	ff cf       	rjmp	.-2      	; 0x2a6 <__stop_program>
